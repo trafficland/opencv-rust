@@ -10,7 +10,7 @@ use opencv::features2d::Feature2D;
 fn run() -> Result<(),String> {
     let window = "video capture";
     try!(highgui::named_window(window,1));
-    let mut cam = try!(videoio::VideoCapture::device(1));
+    let mut cam = try!(videoio::VideoCapture::index(1));
     let mut orb = try!(features2d::ORB::create(500, 1.2f32, 8, 31, 0, 2,
         features2d::ORB_HARRIS_SCORE, 31, 20));
     loop {

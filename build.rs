@@ -25,7 +25,13 @@ fn main() {
         .expect("Could not find opencv2 dir in pkg-config includes");
 
     // add 3rdparty lib dit. pkgconfig forgets it somehow.
-    println!("cargo:rustc-link-search=native={}/share/OpenCV/3rdparty/lib", pkg_config::Config::get_variable("opencv", "prefix").unwrap());
+    let third_party_dir = format!("{}/share/OpenCV/3rdparty/lib", pkg_config::Config::get_variable("opencv", "prefix").unwrap());
+    println!("cargo:rustc-link-search=native={}", third_party_dir);
+    let third_party_libs = glob(&(third_party_dir.clone()+"/*.a")).unwrap().map(|f| {
+        let f = f.unwrap();
+        let s = f.file_stem().unwrap().to_str();
+        s.unwrap()[3..].to_string()
+    }).collect::<Vec<String>>();
 
     println!("OpenCV lives in {:?}", actual_opencv);
     println!("Generating code in {:?}", out_dir);
@@ -39,25 +45,6 @@ fn main() {
     for entry in glob(&(out_dir.clone() + "/*")).unwrap() {
         fs::remove_file(entry.unwrap()).unwrap()
     }
-
-/*
-    let modules = vec![
-        ("core", vec!["core/types_c.h", "core/core.hpp" ]), // utility, base
-        ("imgproc", vec![ "imgproc/types_c.h", "imgproc/imgproc_c.h",
-                            "imgproc/imgproc.hpp" ]),
-        ("highgui", vec![   //"highgui/cap_ios.h", 
-                            "highgui/highgui.hpp",
-                            "highgui/highgui_c.h",
-                            //"highgui/ios.h"
-                        ]),
-        ("features2d", vec![ "features2d/features2d.hpp" ]),
-        ("photo", vec!["photo/photo_c.h", "photo/photo.hpp" ]),
-        ("video", vec![ "video/tracking.hpp", "video/video.hpp",
-                        "video/background_segm.hpp"]),
-        ("objdetect", vec![ "objdetect/objdetect.hpp" ]),
-        ("calib3d", vec![ "calib3d/calib3d.hpp"])
-    ];
-*/
 
     let opencv_path_as_string = actual_opencv.to_str().unwrap().to_string();
     let modules = glob(&(opencv_path_as_string.clone()+"/*.hpp")).unwrap().map(|entry| {
@@ -191,4 +178,7 @@ fn main() {
         writeln!(&mut hub, "}}\n").unwrap();
     }
     println!("cargo:rustc-link-lib=ocvrs");
+    for lib in third_party_libs {
+        println!("cargo:rustc-link-lib={}", lib);
+    }
 }

@@ -8,7 +8,8 @@ use libc::{ c_void, c_char, size_t };
 
 include!(concat!(env!("OUT_DIR"), "/hub.rs"));
 
+pub mod mat;
+
 pub fn mat() -> ::core::Mat {
     ::core::Mat::new().unwrap()
 }
-

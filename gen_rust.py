@@ -97,9 +97,11 @@ renamed_funcs = {
     "cv_eigen_InputArray_src_bool_computeEigenvectors_OutputArray_eigenvalues_OutputArray_eigenvectors": "eigen",
     "cv_eigen_InputArray_src_OutputArray_eigenvalues_OutputArray_eigenvectors_int_lowindex_int_highindex": "eigen_vectors",
     "cv_hconcat_Mat_src_size_t_nsrc_OutputArray_dst" : "-",
+    "cv_hconcat_VectorOfInputArrayOfArrays_src_OutputArray_dst": "hconcat_many",
     "cv_max_Mat_src1_Mat_src2_Mat_dst": "max_mat_mat",
     "cv_max_Mat_src1_double_src2_Mat_dst": "max_mat",
     "cv_merge_Mat_mv_size_t_count_OutputArray_dst": "-",
+    "cv_merge_VectorOfInputArrayOfArrays_mv_OutputArray_dst": "merge_many",
     "cv_min_Mat_src1_Mat_src2_Mat_dst": "min_mat_mat",
     "cv_min_Mat_src1_double_src2_Mat_dst": "min_mat",
     "cv_norm_InputArray_src1_InputArray_src2_int_normType_InputArray_mask": "norm_with_type",
@@ -111,6 +113,7 @@ renamed_funcs = {
     "cv_split_Mat_m_VectorOfMat_mv": "split",
     "cv_split_Mat_src_Mat_mvbegin": "split_at",
     "cv_vconcat_Mat_src_size_t_nsrc_OutputArray_dst" : "-",
+    "cv_vconcat_VectorOfInputArrayOfArrays_src_OutputArray_dst": "vconcat_many",
     # features2d
     "cv_BOWKMeansTrainer_cluster": "default",
     "cv_BOWKMeansTrainer_cluster_Mat_descriptors": "new",
@@ -235,7 +238,7 @@ class_ignore_list = (
     "cv::MatConstIterator",
     "cv::CommandLineParser",
     "cv::_InputArray", "cv::_OutputArray",
-    "OutputArrayOfArrays", "InputArrayOfArrays", # FIXME ?
+    "OutputArrayOfArrays", # FIXME ?
     "cv::MatAllocator",
     "cv::SparseMat",
     "cv::AlgorithmInfo",
@@ -254,6 +257,7 @@ aliases_types = {
     "unsigned" : "uint",
     "InputArray" : "cv::Mat",
     "OutputArray" : "cv::Mat",
+    "InputArrayOfArrays": "vector<cv::Mat>",
 }
 
 func_ignore_list = (
@@ -432,9 +436,9 @@ class ArgInfo():
         if len(arg_tuple) > 2:
             self.defval = arg_tuple[2]
         self.out = ""
-        if len(arg_tuple) > 3 and "/O" in arg_tuple[3]:
+        if len(arg_tuple) > 3 and "/O" in arg_tuple[3] or self.type.sane == "OutputArray":
             self.out = "O"
-        if len(arg_tuple) > 3 and "/IO" in arg_tuple[3]:
+        elif len(arg_tuple) > 3 and "/IO" in arg_tuple[3] or self.type.sane == "InputOutputArray":
             self.out = "IO"
 
     def rsname(self):
@@ -934,7 +938,7 @@ class BoxedClassTypeInfo(TypeInfo):
         return "%s (boxed)"%(self.typeid)
 
 class VectorTypeInfo(TypeInfo):
-    def __init__(self, gen, typeid, inner):
+    def __init__(self, gen, typeid, inner, alias=None):
         TypeInfo.__init__(self,gen,typeid)
         self.is_by_ptr = True
         self.inner = inner
@@ -944,7 +948,7 @@ class VectorTypeInfo(TypeInfo):
             self.c_sane = "void_X"
             self.inner_cpptype = inner.cpptype
             self.cpptype = "vector<%s >"%(inner.cpptype)
-            self.sane = self.rust_local = "VectorOf"+inner.sane
+            self.sane = self.rust_local = "VectorOf" + (alias if alias else inner.sane)
             self.rust_full = "::types::" + self.rust_local
             self.rust_extern = "*mut c_void"
             self.inner_rust_full = inner.rust_full
@@ -1094,7 +1098,7 @@ class UnknownTypeInfo(TypeInfo):
 #    def __str__(self):
 #        return "Ref[%s]"%(self.inner)
 
-def parse_type(gen, typeid):
+def parse_type(gen, typeid, realtype=None):
     typeid = typeid.strip()
     typeid = typeid.replace("const ", "").replace("..", ".")
 #    if typeid.endswith("&"):
@@ -1115,7 +1119,7 @@ def parse_type(gen, typeid):
         inner = gen.get_type_info(typeid[7:-1])
         if not inner:
             raise NameError("inner type `%s' not found"%(typeid[7:-1]))
-        return VectorTypeInfo(gen, typeid, inner)
+        return VectorTypeInfo(gen, typeid, inner, realtype)
     elif gen.get_value_struct(typeid):
         return ValueStructTypeInfo(gen, gen.get_value_struct(typeid))
     else:
@@ -1124,15 +1128,10 @@ def parse_type(gen, typeid):
             if ci.is_simple:
                 return SimpleClassTypeInfo(gen, ci.nested_cppname)
             else:
-                return BoxedClassTypeInfo(gen, ci.nested_cppname, None)
+                return BoxedClassTypeInfo(gen, ci.nested_cppname, realtype)
         actual = aliases_types.get(typeid)
         if actual:
-            ci = gen.get_class(actual)
-            if ci:
-                if ci.is_simple:
-                    return SimpleClassTypeInfo(gen, ci.nested_cppname)
-                else:
-                    return BoxedClassTypeInfo(gen, ci.nested_cppname, typeid)
+            return parse_type(gen, aliases_types.get(typeid), typeid)
     return UnknownTypeInfo(gen, typeid)
 
 #

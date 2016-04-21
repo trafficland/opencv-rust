@@ -984,6 +984,32 @@ class VectorTypeInfo(TypeInfo):
                     }
                 }
                 """).substitute(self.__dict__))
+            if isinstance(self.inner, PrimitiveTypeInfo):
+                f.write(template("""
+                impl $rust_full {
+                    pub fn from_slice(s: &[$inner_rust_full]) -> $rust_full {
+                        let mut v = Self::new();
+                        for e in s {
+                            v.push((*e).clone());
+                        }
+                        v
+                    }
+                }
+                
+                #[macro_export]
+                macro_rules! $rust_local {
+                    ($$($$x:expr),*) => {
+                        {
+                            let mut v = $$crate$rust_full::new();
+                            $$(
+                                v.push($$x);
+                            )*
+                            v
+                        }
+                    };
+                }
+                """).substitute(self.__dict__))
+                
         if isinstance(self.inner, BoxedClassTypeInfo) or self.inner.is_by_ptr:
             with open(self.gen.output_path+"/"+self.sane+".type.rs", "a") as f:
                 f.write(template("""

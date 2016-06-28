@@ -685,7 +685,7 @@ class FuncInfo(GeneralInfo):
         elif isinstance(self.rv_type(), VectorTypeInfo):
             io.write("    Ok(%s{ ptr: rv.result })\n"%(self.rv_type().rust_full))
         elif isinstance(self.rv_type(), BoxedClassTypeInfo):
-            io.write("    Ok(%s{ ptr: rv.result })\n"%(self.rv_type().rust_full))
+            io.write("    Ok(%s{ ptr: rv.result, owned: true })\n"%(self.rv_type().rust_full))
         else:
             io.write("    Ok(rv.result)\n")
         io.write("  }\n");
@@ -961,6 +961,7 @@ class VectorTypeInfo(TypeInfo):
                     fn cv_new_$sane() -> *mut c_void;
                     fn cv_delete_$sane(ptr:*mut c_void) -> ();
                     fn cv_push_$sane(ptr:*mut c_void, ptr2: *const c_void) -> ();
+                    fn cv_at_$sane(ptr:*mut c_void, idx: usize) -> *mut c_void;
                     fn cv_${sane}_len(ptr:*mut c_void) -> i32;
                     fn cv_${sane}_data(ptr:*mut c_void) -> *mut c_void;
                 }
@@ -1019,6 +1020,20 @@ class VectorTypeInfo(TypeInfo):
                         }
                     }
                     """).substitute(self.__dict__))
+                if isinstance(self.inner, BoxedClassTypeInfo):
+                    f.write(template("""
+                        impl $rust_full {
+                            pub fn at(&self, idx: usize) -> $inner_rust_full {
+                                unsafe {
+                                    let ptr = cv_at_$sane(self.ptr, idx);
+                                    $inner_rust_full {
+                                        ptr: ptr,
+                                        owned: false,
+                                    }
+                                }
+                            }
+                        }
+                        """).substitute(self.__dict__))
         else:
             with open(self.gen.output_path+"/"+self.sane+".type.rs", "a") as f:
                 f.write(template("""
@@ -1045,6 +1060,10 @@ class VectorTypeInfo(TypeInfo):
                 void cv_push_$sane(void* ptr, void* ptr2) {
                     $inner_cpptype* val = ($inner_cpptype*)ptr2;
                     (($cpptype*) ptr)->push_back(*val);
+                }
+                void* cv_at_$sane(void* ptr, int idx) {
+                    $inner_cpptype* vec = (($cpptype*) ptr)->data();
+                    return (void*) &vec[idx];
                 }
                 int cv_${sane}_len(void* ptr) { return (($cpptype*) ptr)->size(); }
                 $ctype* cv_${sane}_data(void* ptr) {
@@ -1601,11 +1620,14 @@ class RustWrapperGenerator(object):
             // boxed class $typeid
             #[allow(dead_code)]
             pub struct $rust_local {
-                pub ptr: *mut c_void
+                pub ptr: *mut c_void,
+                pub owned: bool,
             }
             impl Drop for $rust_full {
                 fn drop(&mut self) {
-                    unsafe { ::sys::cv_delete_$sane(self.ptr) };
+                    if self.owned {
+                        unsafe { ::sys::cv_delete_$sane(self.ptr) };
+                    }
                 }
             }
             impl $rust_full {

@@ -13,6 +13,10 @@ extern "C" {
     return ((cv::Mat*)mat)->at<float>(i, j);
   }
   
+  int cv_core_Mat_at_int_i_int_j_int(void* mat, int i, int j) {
+    return ((cv::Mat*)mat)->at<int>(i, j);
+  }
+  
   double cv_core_Mat_at_int_i_double(void* mat, int i) {
     return ((cv::Mat*)mat)->at<double>(i);
   }

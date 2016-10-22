@@ -20,6 +20,13 @@ extern "C" {
   double cv_core_Mat_at_int_i_double(void* mat, int i) {
     return ((cv::Mat*)mat)->at<double>(i);
   }
+
+  void cv_core_Mat_at_int_i_int_j_vec3b(void* mat, int i, int j, uchar* out) {
+    Vec3b v = ((cv::Mat*)mat)->at<Vec3b>(i, j);
+    for (int x = 0; x < 3; x++) {
+        out[x] = v[x];
+    }
+  }
   
   struct cv_return_value_void_X cv_core_Mat_Mat_rows_cols_type_data(int rows, int cols, int type, void* data, size_t step) {
     try {

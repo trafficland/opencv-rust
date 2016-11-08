@@ -10,6 +10,9 @@ version = "0.2.2"
 authors = ["Mathieu Poumeyrol <kali@zoy.org>"]
 build = "build.rs"
 
+[package.metadata]
+opencv-src = "https://github.com/opencv/opencv/archive/2.4.13.1.zip"
+
 [[bin]]
 name = "capture"
 path = "examples/video_capture.rs"
@@ -29,7 +32,13 @@ path = "examples/video_to_gray.rs"
 [dependencies]
 libc = "0.2"
 
+[features]
+build  = []
+
 [build-dependencies]
-pkg-config = "0.3"
-gcc = "0.3"
-glob = "0.2"
+pkg-config = "0.3.8"
+gcc = "0.3.38"
+glob = "0.2.11"
+curl = "0.4.1"
+cmake = "0.1.18"
+toml = {version = "0.2.1", default-features = false}

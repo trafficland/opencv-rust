@@ -33,9 +33,11 @@ fn main() {
         gcc.include(path);
     }
 
-    for entry in glob(&(out_dir.clone() + "/*")).unwrap() {
-        fs::remove_file(entry.unwrap()).unwrap()
-    }
+    println!("Clearing {} before the next build.", out_dir);
+    fs::remove_dir_all(&out_dir)
+        .expect(&format!("Failed to remove {}.", out_dir));
+    fs::create_dir(&out_dir)
+        .expect(&format!("Failed to create {}.", out_dir));
 
     let modules = vec![
         ("core", vec!["core/types_c.h", "core/core.hpp" ]), // utility, base

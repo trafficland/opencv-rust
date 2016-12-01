@@ -217,27 +217,31 @@ fn clean_previous_build(out_dir: &str) -> BuildResult<()> {
 }
 
 fn download_opencv_source(out_dir: &str, opencv_source_url: &str) -> BuildResult<String> {
-    // TODO: The archive name should be calculated from the URL read from the TOML file.
-    let opencv_archive_path = format!("{}/opencv-2.4.13.1.zip", out_dir);
-    let mut curl = easy::Easy::new();
-    curl.url(opencv_source_url)
-        .or(Err(format!("Failed set the OpenCV source URL {}.", opencv_source_url)))?;
-    curl.follow_location(true)
-        .or(Err(format!("Failed to set follow location on download of {}.", opencv_source_url)))?;
-    let mut file = fs::OpenOptions::new()
-        .read(true)
-        .append(true)
-        .create(true)
-        .open(&opencv_archive_path)
-        .or(Err(format!("Unable to open the destination file {}.", &opencv_archive_path)))?;
-    let mut transfer = curl.transfer();
-    transfer.write_function( |data| {
-        file.write(&data).map_err(|_| easy::WriteError::Pause)
-    }).or(Err(format!("Unable to write to file {}.", &opencv_archive_path)))?;
-    transfer.perform()
-        .or(Err(format!("Failed to download {}.", opencv_source_url)))?;
-    println!("Downloaded {} to {}.", &opencv_source_url, &opencv_archive_path);
-    Ok(opencv_archive_path)
+    opencv_source_url.split("/")
+        .last()
+        .ok_or(format!("Unabled to extract the opencv source archive name from {}.", &opencv_source_url))
+        .and_then(|archive_name| {
+            let opencv_archive_path = format!("{}/opencv-{}", out_dir, archive_name);
+            let mut curl = easy::Easy::new();
+            curl.url(opencv_source_url)
+                .or(Err(format!("Failed to set the OpenCV source URL {}.", opencv_source_url)))?;
+            curl.follow_location(true)
+                .or(Err(format!("Failed to set follow location on download of {}.", opencv_source_url)))?;
+            let mut file = fs::OpenOptions::new()
+                .read(true)
+                .append(true)
+                .create(true)
+                .open(&opencv_archive_path)
+                .or(Err(format!("Unable to open the destination file {}.", &opencv_archive_path)))?;
+            let mut transfer = curl.transfer();
+            transfer.write_function( |data| {
+                file.write(&data).map_err(|_| easy::WriteError::Pause)
+            }).or(Err(format!("Unable to write to file {}.", &opencv_archive_path)))?;
+            transfer.perform()
+                .or(Err(format!("Failed to download {}.", opencv_source_url)))?;
+            println!("Downloaded {} to {}.", &opencv_source_url, &opencv_archive_path);
+            Ok(opencv_archive_path)
+        })
 }
 
 fn extract_opencv_source(out_dir: &str, archive_path: &str) -> BuildResult<String> {

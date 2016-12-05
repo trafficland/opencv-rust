@@ -32,31 +32,15 @@ fn main() {
             .expect("Failed to build opencv via build script.");
     }
 
-    let pkg_config_path = format!("{}:{}/dist/lib/pkgconfig",
-                                  env::var(PKG_CONFIG_PATH_ENV_VAR).unwrap_or("/usr/local/lib/pkgconfig/".to_string()),
-                                  &out_dir);
-    env::set_var(PKG_CONFIG_PATH_ENV_VAR, pkg_config_path);
-    let opencv = pkg_config::Config::new()
-        .statik(true)
-        .probe("opencv")
-        // TODO: Get rid of the unwrap.
-        .unwrap();
-    let mut search_paths = opencv.include_paths.clone();
-    search_paths.push(PathBuf::from("/usr/include"));
-    let search_opencv = search_paths.iter().map( |p| {
-        let mut path = PathBuf::from(p);
-        path.push("opencv2");
-        path
-    }).find( { |path| read_dir(path).is_ok() });
-    let actual_opencv = search_opencv
-        .expect("Could not find opencv2 dir in pkg-config includes");
+    let (opencv_pkg_info, opencv_path) = find_opencv_libs(&out_dir)
+        .expect("Could not find the opencv libs.");
 
-    println!("OpenCV lives in {:?}", actual_opencv);
+    println!("OpenCV lives in {:?}", opencv_path);
     println!("Generating code in {:?}", out_dir);
 
     let mut gcc = gcc::Config::new();
     gcc.flag("-std=c++0x");
-    for path in opencv.include_paths {
+    for path in opencv_pkg_info.include_paths {
         gcc.include(path);
     }
 
@@ -108,7 +92,7 @@ fn main() {
         if !Command::new("python2.7")
             .args(&["gen_rust.py", "hdr_parser.py", &*out_dir, module.0])
             .args(&(module.1.iter().map(|p| {
-                let mut path = actual_opencv.clone();
+                let mut path = opencv_path.clone();
                 path.push(p);
                 path.into_os_string()
             }).collect::<Vec<OsString>>()[..]))
@@ -217,27 +201,31 @@ fn clean_previous_build(out_dir: &str) -> BuildResult<()> {
 }
 
 fn download_opencv_source(out_dir: &str, opencv_source_url: &str) -> BuildResult<String> {
-    // TODO: The archive name should be calculated from the URL read from the TOML file.
-    let opencv_archive_path = format!("{}/opencv-2.4.13.1.zip", out_dir);
-    let mut curl = easy::Easy::new();
-    curl.url(opencv_source_url)
-        .or(Err(format!("Failed set the OpenCV source URL {}.", opencv_source_url)))?;
-    curl.follow_location(true)
-        .or(Err(format!("Failed to set follow location on download of {}.", opencv_source_url)))?;
-    let mut file = fs::OpenOptions::new()
-        .read(true)
-        .append(true)
-        .create(true)
-        .open(&opencv_archive_path)
-        .or(Err(format!("Unable to open the destination file {}.", &opencv_archive_path)))?;
-    let mut transfer = curl.transfer();
-    transfer.write_function( |data| {
-        file.write(&data).map_err(|_| easy::WriteError::Pause)
-    }).or(Err(format!("Unable to write to file {}.", &opencv_archive_path)))?;
-    transfer.perform()
-        .or(Err(format!("Failed to download {}.", opencv_source_url)))?;
-    println!("Downloaded {} to {}.", &opencv_source_url, &opencv_archive_path);
-    Ok(opencv_archive_path)
+    opencv_source_url.split("/")
+        .last()
+        .ok_or(format!("Unabled to extract the opencv source archive name from {}.", &opencv_source_url))
+        .and_then(|archive_name| {
+            let opencv_archive_path = format!("{}/opencv-{}", out_dir, archive_name);
+            let mut curl = easy::Easy::new();
+            curl.url(opencv_source_url)
+                .or(Err(format!("Failed to set the OpenCV source URL {}.", opencv_source_url)))?;
+            curl.follow_location(true)
+                .or(Err(format!("Failed to set follow location on download of {}.", opencv_source_url)))?;
+            let mut file = fs::OpenOptions::new()
+                .read(true)
+                .append(true)
+                .create(true)
+                .open(&opencv_archive_path)
+                .or(Err(format!("Unable to open the destination file {}.", &opencv_archive_path)))?;
+            let mut transfer = curl.transfer();
+            transfer.write_function( |data| {
+                file.write(&data).map_err(|_| easy::WriteError::Pause)
+            }).or(Err(format!("Unable to write to file {}.", &opencv_archive_path)))?;
+            transfer.perform()
+                .or(Err(format!("Failed to download {}.", opencv_source_url)))?;
+            println!("Downloaded {} to {}.", &opencv_source_url, &opencv_archive_path);
+            Ok(opencv_archive_path)
+        })
 }
 
 fn extract_opencv_source(out_dir: &str, archive_path: &str) -> BuildResult<String> {
@@ -287,6 +275,32 @@ fn fix_lib_png(out_dir: &str) -> BuildResult<()> {
     fs::copy(&src, &dst)
         .map_err( |_| format!("Failed to copy {} to {}.", src, dst) )
         .map(|_| ())
+}
+
+fn find_opencv_libs(out_dir: &str) -> BuildResult<(pkg_config::Library, PathBuf)> {
+    let pkg_config_path = format!("{}:{}/dist/lib/pkgconfig",
+                                  env::var(PKG_CONFIG_PATH_ENV_VAR).unwrap_or("/usr/local/lib/pkgconfig/".to_string()),
+                                  &out_dir);
+    env::set_var(PKG_CONFIG_PATH_ENV_VAR, &pkg_config_path);
+    pkg_config::Config::new()
+        .statik(true)
+        .probe("opencv")
+        .map_err(|_| format!("Could not find the opencv pkg information in {}.", &pkg_config_path))
+        .and_then( |opencv_lib_info| {
+            let mut search_paths = opencv_lib_info.include_paths.clone();
+            search_paths.push(PathBuf::from("/usr/include"));
+            search_paths.iter()
+                .map( |p| {
+                    let mut path = PathBuf::from(p);
+                    path.push("opencv2");
+                    path
+                })
+                .find( |path| {
+                    println!("Checking include path {} for opencv.", path.to_string_lossy());
+                    read_dir(path).is_ok()
+                })
+                .map_or(Err("Could not find opencv on any of the includes paths.".to_string()), |opencv_path| Ok((opencv_lib_info, opencv_path)))
+        })
 }
 
 fn build_required(out_dir: &str) -> bool {

@@ -32,13 +32,306 @@ path = "examples/video_to_gray.rs"
 [dependencies]
 libc = "0.2"
 
-[features]
-build  = []
-
 [build-dependencies]
 pkg-config = "0.3.8"
 gcc = "0.3.38"
 glob = "0.2.11"
 curl = "0.4.1"
 cmake = "0.1.18"
-toml = {version = "0.2.1", default-features = false}
+toml = "0.2.1"
+
+# DO NOT MOVE THE FEATURES SECTION.
+# The features section is genertated by the build.rs script.
+# build.rs relies on the features section being at the end of the file.
+# The features section and content below will be completely replaced.
+# Any manual edits should be above the features section.
+[features]
+build = []
+with_1394_on = ["build"] #default = ON   IF (NOT ANDROID AND NOT IOS)
+with_1394_off = ["build"] #default = ON   IF (NOT ANDROID AND NOT IOS)
+
+with_avfoundation_on = ["build"] #default = ON   IF IOS
+with_avfoundation_off = ["build"] #default = ON   IF IOS
+
+with_carbon_on = ["build"] #default = OFF  IF APPLE
+with_carbon_off = ["build"] #default = OFF  IF APPLE
+
+with_cuda_on = ["build"] #default = ON   IF (CMAKE_VERSION VERSION_GREATER "2.8" AND NOT IOS)
+with_cuda_off = ["build"] #default = ON   IF (CMAKE_VERSION VERSION_GREATER "2.8" AND NOT IOS)
+
+with_vtk_on = ["build"] #default = OFF IF (NOT ANDROID AND NOT IOS AND NOT CMAKE_CROSSCOMPILING)
+with_vtk_off = ["build"] #default = OFF IF (NOT ANDROID AND NOT IOS AND NOT CMAKE_CROSSCOMPILING)
+
+with_cufft_on = ["build"] #default = ON  IF (CMAKE_VERSION VERSION_GREATER "2.8" AND NOT IOS)
+with_cufft_off = ["build"] #default = ON  IF (CMAKE_VERSION VERSION_GREATER "2.8" AND NOT IOS)
+
+with_cublas_on = ["build"] #default = OFF IF (CMAKE_VERSION VERSION_GREATER "2.8" AND NOT IOS)
+with_cublas_off = ["build"] #default = OFF IF (CMAKE_VERSION VERSION_GREATER "2.8" AND NOT IOS)
+
+with_nvcuvid_on = ["build"] #default = OFF IF (CMAKE_VERSION VERSION_GREATER "2.8" AND NOT ANDROID AND NOT IOS AND NOT APPLE)
+with_nvcuvid_off = ["build"] #default = OFF IF (CMAKE_VERSION VERSION_GREATER "2.8" AND NOT ANDROID AND NOT IOS AND NOT APPLE)
+
+with_eigen_on = ["build"] #default = ON
+with_eigen_off = ["build"] #default = ON
+
+with_vfw_on = ["build"] #default = ON   IF WIN32
+with_vfw_off = ["build"] #default = ON   IF WIN32
+
+with_ffmpeg_on = ["build"] #default = ON   IF (NOT ANDROID AND NOT IOS
+with_ffmpeg_off = ["build"] #default = ON   IF (NOT ANDROID AND NOT IOS
+
+with_gstreamer_on = ["build"] #default = ON   IF (UNIX AND NOT ANDROID)
+with_gstreamer_off = ["build"] #default = ON   IF (UNIX AND NOT ANDROID)
+
+with_gstreamer_0_10_on = ["build"] #default = OFF
+with_gstreamer_0_10_off = ["build"] #default = OFF
+
+with_gtk_on = ["build"] #default = ON   IF (UNIX AND NOT APPLE AND NOT ANDROID)
+with_gtk_off = ["build"] #default = ON   IF (UNIX AND NOT APPLE AND NOT ANDROID)
+
+with_imageio_on = ["build"] #default = OFF  IF APPLE
+with_imageio_off = ["build"] #default = OFF  IF APPLE
+
+with_ipp_on = ["build"] #default = OFF  IF (MSVC OR X86 OR X86_64)
+with_ipp_off = ["build"] #default = OFF  IF (MSVC OR X86 OR X86_64)
+
+with_jasper_on = ["build"] #default = ON   IF (NOT IOS)
+with_jasper_off = ["build"] #default = ON   IF (NOT IOS)
+
+with_jpeg_on = ["build"] #default = ON
+with_jpeg_off = ["build"] #default = ON
+
+with_openexr_on = ["build"] #default = ON   IF (NOT IOS)
+with_openexr_off = ["build"] #default = ON   IF (NOT IOS)
+
+with_opengl_on = ["build"] #default = OFF  IF (NOT ANDROID)
+with_opengl_off = ["build"] #default = OFF  IF (NOT ANDROID)
+
+with_openni_on = ["build"] #default = OFF  IF (NOT ANDROID AND NOT IOS)
+with_openni_off = ["build"] #default = OFF  IF (NOT ANDROID AND NOT IOS)
+
+with_png_on = ["build"] #default = ON
+with_png_off = ["build"] #default = ON
+
+with_pvapi_on = ["build"] #default = ON   IF (NOT ANDROID AND NOT IOS)
+with_pvapi_off = ["build"] #default = ON   IF (NOT ANDROID AND NOT IOS)
+
+with_gigeapi_on = ["build"] #default = ON   IF (NOT ANDROID AND NOT IOS)
+with_gigeapi_off = ["build"] #default = ON   IF (NOT ANDROID AND NOT IOS)
+
+with_qt_on = ["build"] #default = OFF  IF (NOT ANDROID AND NOT IOS)
+with_qt_off = ["build"] #default = OFF  IF (NOT ANDROID AND NOT IOS)
+
+with_win32ui_on = ["build"] #default = ON   IF WIN32
+with_win32ui_off = ["build"] #default = ON   IF WIN32
+
+with_quicktime_on = ["build"] #default = OFF  IF APPLE
+with_quicktime_off = ["build"] #default = OFF  IF APPLE
+
+with_tbb_on = ["build"] #default = OFF  IF (NOT IOS)
+with_tbb_off = ["build"] #default = OFF  IF (NOT IOS)
+
+with_openmp_on = ["build"] #default = OFF
+with_openmp_off = ["build"] #default = OFF
+
+with_cstripes_on = ["build"] #default = OFF  IF WIN32
+with_cstripes_off = ["build"] #default = OFF  IF WIN32
+
+with_tiff_on = ["build"] #default = ON   IF (NOT IOS)
+with_tiff_off = ["build"] #default = ON   IF (NOT IOS)
+
+with_unicap_on = ["build"] #default = OFF  IF (UNIX AND NOT APPLE AND NOT ANDROID)
+with_unicap_off = ["build"] #default = OFF  IF (UNIX AND NOT APPLE AND NOT ANDROID)
+
+with_v4l_on = ["build"] #default = ON   IF (UNIX AND NOT ANDROID)
+with_v4l_off = ["build"] #default = ON   IF (UNIX AND NOT ANDROID)
+
+with_libv4l_on = ["build"] #default = ON   IF (UNIX AND NOT ANDROID)
+with_libv4l_off = ["build"] #default = ON   IF (UNIX AND NOT ANDROID)
+
+with_dshow_on = ["build"] #default = ON   IF (WIN32 AND NOT ARM)
+with_dshow_off = ["build"] #default = ON   IF (WIN32 AND NOT ARM)
+
+with_msmf_on = ["build"] #default = OFF  IF WIN32
+with_msmf_off = ["build"] #default = OFF  IF WIN32
+
+with_ximea_on = ["build"] #default = OFF  IF (NOT ANDROID)
+with_ximea_off = ["build"] #default = OFF  IF (NOT ANDROID)
+
+with_xine_on = ["build"] #default = OFF  IF (UNIX AND NOT APPLE AND NOT ANDROID)
+with_xine_off = ["build"] #default = OFF  IF (UNIX AND NOT APPLE AND NOT ANDROID)
+
+with_opencl_on = ["build"] #default = ON   IF (NOT IOS)
+with_opencl_off = ["build"] #default = ON   IF (NOT IOS)
+
+with_openclamdfft_on = ["build"] #default = ON   IF (NOT ANDROID AND NOT IOS)
+with_openclamdfft_off = ["build"] #default = ON   IF (NOT ANDROID AND NOT IOS)
+
+with_openclamdblas_on = ["build"] #default = ON   IF (NOT ANDROID AND NOT IOS)
+with_openclamdblas_off = ["build"] #default = ON   IF (NOT ANDROID AND NOT IOS)
+
+with_intelperc_on = ["build"] #default = OFF  IF WIN32
+with_intelperc_off = ["build"] #default = OFF  IF WIN32
+
+build_shared_libs_on = ["build"] #default = NOT (ANDROID OR IOS)
+build_shared_libs_off = ["build"] #default = NOT (ANDROID OR IOS)
+
+build_opencv_apps_on = ["build"] #default = (NOT ANDROID) IF (NOT IOS)
+build_opencv_apps_off = ["build"] #default = (NOT ANDROID) IF (NOT IOS)
+
+build_android_examples_on = ["build"] #default = ON  IF ANDROID
+build_android_examples_off = ["build"] #default = ON  IF ANDROID
+
+build_docs_on = ["build"] #default = ON
+build_docs_off = ["build"] #default = ON
+
+build_examples_on = ["build"] #default = OFF
+build_examples_off = ["build"] #default = OFF
+
+build_package_on = ["build"] #default = ON
+build_package_off = ["build"] #default = ON
+
+build_perf_tests_on = ["build"] #default = ON  IF (NOT IOS)
+build_perf_tests_off = ["build"] #default = ON  IF (NOT IOS)
+
+build_tests_on = ["build"] #default = ON  IF (NOT IOS)
+build_tests_off = ["build"] #default = ON  IF (NOT IOS)
+
+build_with_debug_info_on = ["build"] #default = ON
+build_with_debug_info_off = ["build"] #default = ON
+
+build_with_static_crt_on = ["build"] #default = ON IF MSVC
+build_with_static_crt_off = ["build"] #default = ON IF MSVC
+
+build_fat_java_lib_on = ["build"] #default = ON IF NOT BUILD_SHARED_LIBS AND CMAKE_COMPILER_IS_GNUCXX
+build_fat_java_lib_off = ["build"] #default = ON IF NOT BUILD_SHARED_LIBS AND CMAKE_COMPILER_IS_GNUCXX
+
+build_android_service_on = ["build"] #default = OFF IF ANDROID AND ANDROID_SOURCE_TREE
+build_android_service_off = ["build"] #default = OFF IF ANDROID AND ANDROID_SOURCE_TREE
+
+build_android_package_on = ["build"] #default = OFF IF ANDROID
+build_android_package_off = ["build"] #default = OFF IF ANDROID
+
+build_tiny_gpu_module_on = ["build"] #default = OFF
+build_tiny_gpu_module_off = ["build"] #default = OFF
+
+build_zlib_on = ["build"] #default = WIN32 OR APPLE
+build_zlib_off = ["build"] #default = WIN32 OR APPLE
+
+build_tiff_on = ["build"] #default = WIN32 OR ANDROID OR APPLE
+build_tiff_off = ["build"] #default = WIN32 OR ANDROID OR APPLE
+
+build_jasper_on = ["build"] #default = WIN32 OR ANDROID OR APPLE
+build_jasper_off = ["build"] #default = WIN32 OR ANDROID OR APPLE
+
+build_jpeg_on = ["build"] #default = WIN32 OR ANDROID OR APPLE
+build_jpeg_off = ["build"] #default = WIN32 OR ANDROID OR APPLE
+
+build_png_on = ["build"] #default = WIN32 OR ANDROID OR APPLE
+build_png_off = ["build"] #default = WIN32 OR ANDROID OR APPLE
+
+build_openexr_on = ["build"] #default = WIN32 OR ANDROID OR APPLE
+build_openexr_off = ["build"] #default = WIN32 OR ANDROID OR APPLE
+
+build_tbb_on = ["build"] #default = ANDROID
+build_tbb_off = ["build"] #default = ANDROID
+
+install_create_distrib_on = ["build"] #default = OFF
+install_create_distrib_off = ["build"] #default = OFF
+
+install_c_examples_on = ["build"] #default = OFF
+install_c_examples_off = ["build"] #default = OFF
+
+install_python_examples_on = ["build"] #default = OFF
+install_python_examples_off = ["build"] #default = OFF
+
+install_android_examples_on = ["build"] #default = OFF IF ANDROID
+install_android_examples_off = ["build"] #default = OFF IF ANDROID
+
+install_to_mangled_paths_on = ["build"] #default = OFF IF (UNIX AND NOT ANDROID AND NOT IOS AND BUILD_SHARED_LIBS)
+install_to_mangled_paths_off = ["build"] #default = OFF IF (UNIX AND NOT ANDROID AND NOT IOS AND BUILD_SHARED_LIBS)
+
+install_tests_on = ["build"] #default = OFF
+install_tests_off = ["build"] #default = OFF
+
+enable_dynamic_cuda_on = ["build"] #default = ON   IF ANDROID
+enable_dynamic_cuda_off = ["build"] #default = ON   IF ANDROID
+
+enable_precompiled_headers_on = ["build"] #default = ON   IF (NOT IOS)
+enable_precompiled_headers_off = ["build"] #default = ON   IF (NOT IOS)
+
+enable_solution_folders_on = ["build"] #default = (MSVC_IDE OR CMAKE_GENERATOR MATCHES Xcode) IF (CMAKE_VERSION VERSION_GREATER "2.8.0")
+enable_solution_folders_off = ["build"] #default = (MSVC_IDE OR CMAKE_GENERATOR MATCHES Xcode) IF (CMAKE_VERSION VERSION_GREATER "2.8.0")
+
+enable_profiling_on = ["build"] #default = OFF  IF CMAKE_COMPILER_IS_GNUCXX
+enable_profiling_off = ["build"] #default = OFF  IF CMAKE_COMPILER_IS_GNUCXX
+
+enable_coverage_on = ["build"] #default = OFF  IF CMAKE_COMPILER_IS_GNUCXX
+enable_coverage_off = ["build"] #default = OFF  IF CMAKE_COMPILER_IS_GNUCXX
+
+enable_omit_frame_pointer_on = ["build"] #default = ON   IF CMAKE_COMPILER_IS_GNUCXX AND NOT (APPLE AND CMAKE_COMPILER_IS_CLANGCXX)
+enable_omit_frame_pointer_off = ["build"] #default = ON   IF CMAKE_COMPILER_IS_GNUCXX AND NOT (APPLE AND CMAKE_COMPILER_IS_CLANGCXX)
+
+enable_powerpc_on = ["build"] #default = ON   IF (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_SYSTEM_PROCESSOR MATCHES powerpc.*)
+enable_powerpc_off = ["build"] #default = ON   IF (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_SYSTEM_PROCESSOR MATCHES powerpc.*)
+
+enable_fast_math_on = ["build"] #default = OFF  IF (CMAKE_COMPILER_IS_GNUCXX AND (X86 OR X86_64))
+enable_fast_math_off = ["build"] #default = OFF  IF (CMAKE_COMPILER_IS_GNUCXX AND (X86 OR X86_64))
+
+enable_sse_on = ["build"] #default = ON   IF ((MSVC OR CMAKE_COMPILER_IS_GNUCXX) AND (X86 OR X86_64))
+enable_sse_off = ["build"] #default = ON   IF ((MSVC OR CMAKE_COMPILER_IS_GNUCXX) AND (X86 OR X86_64))
+
+enable_sse2_on = ["build"] #default = ON   IF ((MSVC OR CMAKE_COMPILER_IS_GNUCXX) AND (X86 OR X86_64))
+enable_sse2_off = ["build"] #default = ON   IF ((MSVC OR CMAKE_COMPILER_IS_GNUCXX) AND (X86 OR X86_64))
+
+enable_sse3_on = ["build"] #default = ON   IF ((CV_ICC OR CMAKE_COMPILER_IS_GNUCXX) AND (X86 OR X86_64))
+enable_sse3_off = ["build"] #default = ON   IF ((CV_ICC OR CMAKE_COMPILER_IS_GNUCXX) AND (X86 OR X86_64))
+
+enable_ssse3_on = ["build"] #default = OFF  IF (CMAKE_COMPILER_IS_GNUCXX AND (X86 OR X86_64))
+enable_ssse3_off = ["build"] #default = OFF  IF (CMAKE_COMPILER_IS_GNUCXX AND (X86 OR X86_64))
+
+enable_sse41_on = ["build"] #default = OFF  IF ((CV_ICC OR CMAKE_COMPILER_IS_GNUCXX) AND (X86 OR X86_64))
+enable_sse41_off = ["build"] #default = OFF  IF ((CV_ICC OR CMAKE_COMPILER_IS_GNUCXX) AND (X86 OR X86_64))
+
+enable_sse42_on = ["build"] #default = OFF  IF (CMAKE_COMPILER_IS_GNUCXX AND (X86 OR X86_64))
+enable_sse42_off = ["build"] #default = OFF  IF (CMAKE_COMPILER_IS_GNUCXX AND (X86 OR X86_64))
+
+enable_avx_on = ["build"] #default = OFF  IF ((MSVC OR CMAKE_COMPILER_IS_GNUCXX) AND (X86 OR X86_64))
+enable_avx_off = ["build"] #default = OFF  IF ((MSVC OR CMAKE_COMPILER_IS_GNUCXX) AND (X86 OR X86_64))
+
+enable_avx2_on = ["build"] #default = OFF  IF ((MSVC OR CMAKE_COMPILER_IS_GNUCXX) AND (X86 OR X86_64))
+enable_avx2_off = ["build"] #default = OFF  IF ((MSVC OR CMAKE_COMPILER_IS_GNUCXX) AND (X86 OR X86_64))
+
+enable_neon_on = ["build"] #default = AARCH64 IF CMAKE_COMPILER_IS_GNUCXX AND (ARM OR AARCH64
+enable_neon_off = ["build"] #default = AARCH64 IF CMAKE_COMPILER_IS_GNUCXX AND (ARM OR AARCH64
+
+enable_vfpv3_on = ["build"] #default = AARCH64 IF CMAKE_COMPILER_IS_GNUCXX AND (ARM OR AARCH64
+enable_vfpv3_off = ["build"] #default = AARCH64 IF CMAKE_COMPILER_IS_GNUCXX AND (ARM OR AARCH64
+
+enable_noisy_warnings_on = ["build"] #default = OFF
+enable_noisy_warnings_off = ["build"] #default = OFF
+
+opencv_warnings_are_errors_on = ["build"] #default = OFF
+opencv_warnings_are_errors_off = ["build"] #default = OFF
+
+enable_winrt_mode_on = ["build"] #default = OFF  IF WIN32
+enable_winrt_mode_off = ["build"] #default = OFF  IF WIN32
+
+enable_winrt_mode_native_on = ["build"] #default = OFF  IF WIN32
+enable_winrt_mode_native_off = ["build"] #default = OFF  IF WIN32
+
+enable_libvs2013_on = ["build"] #default = OFF  IF WIN32 AND (MSVC_VERSION EQUAL 1800)
+enable_libvs2013_off = ["build"] #default = OFF  IF WIN32 AND (MSVC_VERSION EQUAL 1800)
+
+enable_winsdk81_on = ["build"] #default = OFF  IF WIN32 AND (MSVC_VERSION EQUAL 1800)
+enable_winsdk81_off = ["build"] #default = OFF  IF WIN32 AND (MSVC_VERSION EQUAL 1800)
+
+enable_winphonesdk80_on = ["build"] #default = OFF  IF WIN32 AND (MSVC_VERSION EQUAL 1700)
+enable_winphonesdk80_off = ["build"] #default = OFF  IF WIN32 AND (MSVC_VERSION EQUAL 1700)
+
+enable_winphonesdk81_on = ["build"] #default = OFF  IF WIN32 AND (MSVC_VERSION EQUAL 1800)
+enable_winphonesdk81_off = ["build"] #default = OFF  IF WIN32 AND (MSVC_VERSION EQUAL 1800)
+
+cmake_verbose_on = ["build"] #default = OFF
+cmake_verbose_off = ["build"] #default = OFF
+

@@ -171,7 +171,7 @@ fn main() {
         }
         writeln!(&mut hub, "}}\n").unwrap();
     }
-    println!("cargo:rustc-link-lib=ocvrs");
+    println!("cargo:rustc-link-lib=static=ocvrs");
 }
 
 type BuildResult<T> = Result<T, String>;

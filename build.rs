@@ -136,8 +136,8 @@ fn main() {
     for ref module in &modules {
         println!("Compiling = {:?}", module.0);
         let e = Command::new("sh").current_dir(&out_dir).arg("-c").arg(
-            format!("g++ {}.consts.cpp -o {}.consts `pkg-config --cflags --libs opencv`",
-                    module.0, module.0)
+            format!("g++ {}.consts.cpp -o {}.consts `pkg-config --cflags --libs opencv` -L{}/share/OpenCV/3rdparty/lib/",
+                    module.0, module.0, dist_dir(&out_dir))
         ).status().unwrap();
         assert!(e.success());
         let e = Command::new("sh").current_dir(&out_dir).arg("-c").arg(
@@ -172,6 +172,7 @@ fn main() {
         writeln!(&mut hub, "}}\n").unwrap();
     }
     println!("cargo:rustc-link-lib=static=ocvrs");
+    println!("cargo:rustc-link-search=native={}/share/OpenCV/3rdparty/lib/", dist_dir(&out_dir));
 }
 
 type BuildResult<T> = Result<T, String>;

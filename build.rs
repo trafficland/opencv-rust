@@ -260,8 +260,15 @@ fn build_opencv(out_dir: &str, src_dir: &str) -> BuildResult<()> {
     parse_features(src_dir, |feats| {
         let dist_dir = dist_dir(out_dir);
         let mut cmake = cmake::Config::new(src_dir);
-        cmake.define("CMAKE_BUILD_TYPE", "Release");
         cmake.define("CMAKE_INSTALL_PREFIX", &dist_dir);
+
+        if env::var("PROFILE").map(|s| s == "debug".to_string()).unwrap_or(false) {
+            cmake.define("CMAKE_BUILD_TYPE", "Debug");
+            cmake.define("CMAKE_C_FLAGS", "-Og");
+            cmake.define("CMAKE_CXX_FLAGS", "-Og");
+        } else {
+            cmake.define("CMAKE_BUILD_TYPE", "Release");
+        }
         for feat in feats {
             let feat_on = env::var(format!("CARGO_FEATURE_{}_ON", feat.name)).is_ok();
             let feat_off = env::var(format!("CARGO_FEATURE_{}_OFF", feat.name)).is_ok();

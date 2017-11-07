@@ -48,7 +48,7 @@ fn main() {
     println!("OpenCV lives in {:?}", opencv_path);
     println!("Generating code in {:?}", out_dir);
 
-    let mut gcc = gcc::Config::new();
+    let mut gcc = gcc::Build::new();
     gcc.flag("-std=c++0x");
     for path in opencv_pkg_info.include_paths {
         gcc.include(path);

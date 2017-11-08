@@ -11,7 +11,7 @@ authors = ["Mathieu Poumeyrol <kali@zoy.org>"]
 build = "build.rs"
 
 [package.metadata]
-opencv-src = "https://github.com/opencv/opencv/archive/2.4.13.1.zip"
+opencv-src = "https://github.com/opencv/opencv/archive/2.4.13.4.zip"
 
 [[bin]]
 name = "capture"

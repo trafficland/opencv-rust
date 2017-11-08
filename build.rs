@@ -48,7 +48,7 @@ fn main() {
     println!("OpenCV lives in {:?}", opencv_path);
     println!("Generating code in {:?}", out_dir);
 
-    let mut gcc = gcc::Config::new();
+    let mut gcc = gcc::Build::new();
     gcc.flag("-std=c++0x");
     for path in opencv_pkg_info.include_paths {
         gcc.include(path);
@@ -136,8 +136,8 @@ fn main() {
     for ref module in &modules {
         println!("Compiling = {:?}", module.0);
         let e = Command::new("sh").current_dir(&out_dir).arg("-c").arg(
-            format!("g++ {}.consts.cpp -o {}.consts `pkg-config --cflags --libs opencv`",
-                    module.0, module.0)
+            format!("g++ {}.consts.cpp -o {}.consts `pkg-config --cflags --libs opencv` -L{}/share/OpenCV/3rdparty/lib/",
+                    module.0, module.0, dist_dir(&out_dir))
         ).status().unwrap();
         assert!(e.success());
         let e = Command::new("sh").current_dir(&out_dir).arg("-c").arg(
@@ -172,6 +172,7 @@ fn main() {
         writeln!(&mut hub, "}}\n").unwrap();
     }
     println!("cargo:rustc-link-lib=static=ocvrs");
+    println!("cargo:rustc-link-search=native={}/share/OpenCV/3rdparty/lib/", dist_dir(&out_dir));
 }
 
 type BuildResult<T> = Result<T, String>;
@@ -259,8 +260,15 @@ fn build_opencv(out_dir: &str, src_dir: &str) -> BuildResult<()> {
     parse_features(src_dir, |feats| {
         let dist_dir = dist_dir(out_dir);
         let mut cmake = cmake::Config::new(src_dir);
-        cmake.define("CMAKE_BUILD_TYPE", "Release");
         cmake.define("CMAKE_INSTALL_PREFIX", &dist_dir);
+
+        if env::var("PROFILE").map(|s| s == "debug".to_string()).unwrap_or(false) {
+            cmake.define("CMAKE_BUILD_TYPE", "Debug");
+            cmake.define("CMAKE_C_FLAGS", "-Og");
+            cmake.define("CMAKE_CXX_FLAGS", "-Og");
+        } else {
+            cmake.define("CMAKE_BUILD_TYPE", "Release");
+        }
         for feat in feats {
             let feat_on = env::var(format!("CARGO_FEATURE_{}_ON", feat.name)).is_ok();
             let feat_off = env::var(format!("CARGO_FEATURE_{}_OFF", feat.name)).is_ok();
